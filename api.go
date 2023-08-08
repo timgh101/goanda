@@ -1,7 +1,6 @@
 package goanda
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -50,6 +49,5 @@ func (o *oandaAPI) GetRequestJSON(url string) (*http.Response, []byte, error) {
 		return &http.Response{}, []byte{}, err
 	}
 
-	fmt.Println("Response Status = ", resp.Status)
 	return resp, body, nil
 }

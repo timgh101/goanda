@@ -1,6 +1,9 @@
 package goanda
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestGoandaTest(t *testing.T) {
 
@@ -14,8 +17,32 @@ func TestGoandaTest(t *testing.T) {
 
 func TestGetAccounts(t *testing.T) {
 
-	GetAccounts()
-	t.Log("accounts test")
+	accts, err := GetAccounts()
+	if err != nil {
+		t.Errorf("TestGetAccounts error: ")
+		fmt.Println(err)
+	}
+	fmt.Println(accts)
+
+}
+
+func TestGetAccount(t *testing.T) {
+
+	accts, err := GetAccounts()
+	if err != nil {
+		t.Errorf("TestGetAccount error: ")
+		fmt.Println(err)
+	}
+
+	fmt.Println(accts.Accounts[0])
+
+	acct, err := GetAccount(accts.Accounts[0].ID)
+
+	if err != nil {
+		t.Errorf("TestGetAccount error: ")
+		fmt.Println(err)
+	}
+	fmt.Println(acct)
 
 }
 
