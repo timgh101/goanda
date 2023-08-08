@@ -31,7 +31,7 @@ func GetAccounts() (*accountsResponse, error) {
 	return &ar, nil
 }
 
-func GetAccount(acctID string) (*accountResponse, error) {
+func GetAccount(acctID string) (*accountDetails, error) {
 	api := NewOandaAPI(OANDA_API_KEY)
 	fullEndpoint := fmt.Sprintf("%s/v3/accounts/%s", api.baseDemoEnpoint, acctID)
 	res, bodyBytes, err := api.GetRequestJSON(fullEndpoint)
@@ -40,22 +40,49 @@ func GetAccount(acctID string) (*accountResponse, error) {
 
 	if err != nil {
 		fmt.Println("Error: ")
-		return &accountResponse{}, err
+		return &accountDetails{}, err
 	}
 
 	if res.StatusCode != 200 {
 		err := fmt.Errorf("Non-200 code when getting accounts: %v", res.StatusCode)
-		return &accountResponse{}, err
+		return &accountDetails{}, err
 	}
 
 	var ar accountResponse
 	err = json.Unmarshal(bodyBytes, &ar)
 	if err != nil {
 		fmt.Println("Error: ")
-		return &accountResponse{}, err
+		return &accountDetails{}, err
 	}
 
-	return &ar, nil
+	return &ar.Account, nil
+}
+
+// Get all the instruments that acct is allowed to trade
+func GetAcctInstruments(acctID string) ([]instrument, error) {
+	api := NewOandaAPI(OANDA_API_KEY)
+	fullEndpoint := fmt.Sprintf("%s/v3/accounts/%s/instruments", api.baseDemoEnpoint, acctID)
+	res, bodyBytes, err := api.GetRequestJSON(fullEndpoint)
+
+	if err != nil {
+		fmt.Println("Error: ")
+		return []instrument{}, err
+	}
+
+	if res.StatusCode != 200 {
+		err := fmt.Errorf("Non-200 code when getting accounts: %v", res.StatusCode)
+		return []instrument{}, err
+	}
+
+	var ir getInstrumentsResponse
+	err = json.Unmarshal(bodyBytes, &ir)
+
+	if err != nil {
+		fmt.Println("Error: ")
+		return []instrument{}, err
+	}
+
+	return ir.Instruments, nil
 }
 
 type account struct {
@@ -117,4 +144,23 @@ type accountsResponse struct {
 
 type accountResponse struct {
 	Account accountDetails `json:"account"`
+}
+
+type getInstrumentsResponse struct {
+	Instruments []instrument `json:"instruments"`
+}
+
+type instrument struct {
+	DisplayName                 string `json:"displayName"`
+	DisplayPrecision            int    `json:"displayPrecision"`
+	MarginRate                  string `json:"marginRate"`
+	MaximumOrderUnits           string `json:"maximumOrderUnits"`
+	MaximumPositionSize         string `json:"maximumPositionSize"`
+	MaximumTrailingStopDistance string `json:"maximumTrailingStopDistance"`
+	MinimumTradeSize            string `json:"minimumTradeSize"`
+	MinimumTrailingStopDistance string `json:"minimumTrailingStopDistance"`
+	Name                        string `json:"name"`
+	PipLocation                 int    `json:"pipLocation"`
+	TradeUnitsPrecision         int    `json:"tradeUnitsPrecision"`
+	Type                        string `json:"type"`
 }
